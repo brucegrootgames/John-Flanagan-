@@ -1,0 +1,77 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Flanagan World Map</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <style>
+    #map { height: 100vh; }
+    .legend { background: white; padding: 6px; font-family: Arial; }
+  </style>
+</head>
+<body>
+<div id="map"></div>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+  const map = L.map('map', {
+    crs: L.CRS.Simple,
+    minZoom: -2
+  }).setView([500, 500], 1);
+
+  const bounds = [[0,0], [1000,1000]];
+  const image = L.imageOverlay('map-placeholder.jpg', bounds).addTo(map);
+  map.fitBounds(bounds);
+
+  // Layers
+  const raLayer = L.layerGroup();
+  const bbLayer = L.layerGroup();
+  const rrLayer = L.layerGroup();
+  const travelLayer = L.layerGroup();
+
+  // Marker data
+  const locations = [
+    { name: "Castle Araluen", coords: [450, 500], series: "RA", desc: "Capital of Araluen." },
+    { name: "Hallasholm", coords: [300, 200], series: "BB", desc: "Capital of Skandia." },
+    { name: "Ran-Koshi", coords: [750, 850], series: "RA", desc: "Nihon-Ja fortress." },
+    { name: "Macindaw", coords: [400, 480], series: "RA", desc: "Northern fief involved in Book 5-6." },
+    { name: "Socorro", coords: [200, 150], series: "BB", desc: "City in desert kingdom of Arrida." }
+  ];
+
+  locations.forEach(loc => {
+    const marker = L.circleMarker(loc.coords, {
+      radius: 8,
+      color: loc.series === "RA" ? "green" : loc.series === "BB" ? "blue" : "gold"
+    }).bindPopup(`<b>${loc.name}</b><br>${loc.desc}`);
+
+    if (loc.series === "RA") marker.addTo(raLayer);
+    if (loc.series === "BB") marker.addTo(bbLayer);
+    if (loc.series === "RR") marker.addTo(rrLayer);
+  });
+
+  // Travel paths (simplified)
+  const travelPaths = [
+    [[450, 500], [300, 200]], // Will to Skandia
+    [[450, 500], [750, 850]], // Horace to Nihon-Ja
+  ];
+
+  travelPaths.forEach(path => {
+    L.polyline(path, { color: 'red', dashArray: '5,10' }).addTo(travelLayer);
+  });
+
+  // Add layers
+  const overlays = {
+    "Ranger's Apprentice": raLayer,
+    "Brotherband": bbLayer,
+    "Royal Ranger": rrLayer,
+    "Travel Paths": travelLayer
+  };
+
+  L.control.layers(null, overlays).addTo(map);
+  raLayer.addTo(map);
+  bbLayer.addTo(map);
+  travelLayer.addTo(map);
+</script>
+</body>
+</html>
